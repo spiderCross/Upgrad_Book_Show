@@ -1,0 +1,23 @@
+.upcomingHeading {
+  background-color: #ff9999;
+  text-align: center;
+  padding: 8px;
+  font-size: 1rem;
+}
+.releasedMovieDiv {
+  display: flex;
+  flex-wrap: wrap;
+}
+.gridList {
+  flex-wrap: nowrap;
+  transform: translateZ(0);
+  width: stretch;
+}
+.title {
+  color: whitesmoke;
+}
+
+.gridListItem {
+  height: 250px;
+  width: 250px;
+}
