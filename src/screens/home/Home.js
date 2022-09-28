@@ -1,5 +1,6 @@
 import * as React from "react";
 import {
+  Button,
   Card,
   CardContent,
   Checkbox,
@@ -9,17 +10,16 @@ import {
   GridListTileBar,
   Input,
   InputLabel,
-  ListItemText,
   MenuItem,
   Select,
+  TextField,
   Typography,
 } from "@material-ui/core";
 import PropTypes from "prop-types";
 import { withStyles } from "@material-ui/core/styles";
 
-import Header from "../../common/header/Header";
-
 import "./Home.css";
+import { Link } from "react-router-dom";
 
 const styles = (theme) => ({
   root: {
@@ -50,25 +50,38 @@ const styles = (theme) => ({
 const Home = (homeProps) => {
   const { classes } = homeProps;
   const [upcomingMovies, setUpcomingMovies] = React.useState([]);
-  const [releasedMovie, setReleasedMovies] = React.useState([]);
+  const [releasedMovies, setReleasedMovies] = React.useState([]);
+  const [searchMovies, setSearchMovies] = React.useState([]);
   const [genres, setGenres] = React.useState([]);
   const [selectedGenres, setSelectedGenres] = React.useState([]);
   const [artists, setArtists] = React.useState([]);
   const [selectedArtists, setSelectedArtists] = React.useState([]);
+  const [releaseDateStart, setReleaseDateStart] = React.useState("");
+  const [releaseDateEnd, setReleaseDateEnd] = React.useState("");
+  const [movieName, setMovieName] = React.useState("");
 
   React.useEffect(() => {
-    fetch(
-      `${homeProps.baseUrl}/movies?page=1&limit=10&start_date=2016-08-29&end_date=2018-09-28`
-    ).then((response) =>
-      response.json().then((data) => setReleasedMovies(data.movies))
-    );
-  }, []);
+    fetch(`${homeProps.baseUrl}/movies?page=1&limit=30`).then((response) =>
+      response.json().then((data) => {
+        const movies = data.movies;
+        setUpcomingMovies(
+          movies.filter((movie) => {
+            return movie.status === "PUBLISHED";
+          })
+        );
 
-  React.useEffect(() => {
-    fetch(
-      `${homeProps.baseUrl}/movies?page=1&limit=10&start_date=2018-08-29`
-    ).then((response) =>
-      response.json().then((data) => setUpcomingMovies(data.movies))
+        setReleasedMovies(
+          movies.filter((movie) => {
+            return movie.status === "RELEASED";
+          })
+        );
+
+        setSearchMovies(
+          movies.filter((movie) => {
+            return movie.status === "RELEASED";
+          })
+        );
+      })
     );
   }, []);
 
@@ -88,6 +101,13 @@ const Home = (homeProps) => {
     );
   }, []);
 
+  const nameChangeHandler = (event) => {
+    const {
+      target: { value },
+    } = event;
+    setMovieName(value);
+  };
+
   const genreChangeHandler = (event) => {
     const {
       target: { value },
@@ -102,9 +122,31 @@ const Home = (homeProps) => {
     setSelectedArtists(value);
   };
 
+  const releaseDateStartChangeHamdler = (event) => {
+    const {
+      target: { value },
+    } = event;
+    setReleaseDateStart(value);
+  };
+
+  const releaseDateEndChangeHamdler = (event) => {
+    const {
+      target: { value },
+    } = event;
+    setReleaseDateEnd(value);
+  };
+
+  const applyButtonClickHandler = (event) => {
+    event.preventDefault();
+    setSearchMovies(
+      releasedMovies.filter((movie) => {
+        return movieName === "" ? true : movie.title === movieName;
+      })
+    );
+  };
+
   return (
     <div>
-      <Header baseUrl={homeProps.baseUrl}></Header>
       <div className="upcomingHeading">Upcoming Movies</div>
       <div className={classes.root}>
         <GridList className={classes.gridListNoWrap} cols={6}>
@@ -130,29 +172,34 @@ const Home = (homeProps) => {
       <div className="releasedMovieDiv">
         <div style={{ width: "75%" }}>
           <GridList className={classes.gridListWithWrap} cols={4}>
-            {releasedMovie.map((tile) => (
-              <GridListTile key={tile.id} style={{ height: "350px" }}>
-                <img
-                  src={tile.poster_url}
-                  alt={tile.title}
-                  style={{
-                    height: "inherit",
-                    width: "-webkit-fill-available",
-                  }}
-                />
+            {searchMovies.map((tile) => (
+              <Link
+                to={"/movie/" + tile.id}
+                key={tile.id}
+                style={{ height: "350px", width: "23%" }}
+              >
+                <GridListTile key={tile.id} style={{ height: "350px" }}>
+                  <img
+                    src={tile.poster_url}
+                    alt={tile.title}
+                    style={{
+                      height: "inherit",
+                      width: "-webkit-fill-available",
+                    }}
+                  />
 
-                <GridListTileBar
-                  title={tile.title}
-                  subtitle={`Release Date:${new Date(tile.release_date)
-                    .toUTCString()
-                    .substring(0, 16)
-                    .replace(",", "")}`}
-                  classes={{
-                    root: classes.titleBar,
-                    title: classes.title,
-                  }}
-                />
-              </GridListTile>
+                  <GridListTileBar
+                    title={tile.title}
+                    subtitle={`Release Date:${new Date(
+                      tile.release_date
+                    ).toDateString()}`}
+                    classes={{
+                      root: classes.titleBar,
+                      title: classes.title,
+                    }}
+                  />
+                </GridListTile>
+              </Link>
             ))}
           </GridList>
         </div>
@@ -165,8 +212,13 @@ const Home = (homeProps) => {
               <br />
               <FormControl className="formControl">
                 <InputLabel htmlFor="movieName">Movie Name</InputLabel>
-                <Input id="movieName" name="movieName"></Input>
+                <Input
+                  id="movieName"
+                  name="movieName"
+                  onChange={nameChangeHandler}
+                ></Input>
               </FormControl>
+              <br />
               <br />
               <FormControl className="formControl">
                 <InputLabel htmlFor="genres">Genres</InputLabel>
@@ -186,6 +238,7 @@ const Home = (homeProps) => {
                   ))}
                 </Select>
               </FormControl>
+              <br />
               <br />
               <FormControl className="formControl">
                 <InputLabel htmlFor="artists">Artists</InputLabel>
@@ -212,6 +265,46 @@ const Home = (homeProps) => {
                   })}
                 </Select>
               </FormControl>
+              <br />
+              <br />
+              <FormControl className="formControl">
+                <TextField
+                  id="Release Date Start"
+                  type="date"
+                  label="Release Date Start"
+                  variant="standard"
+                  InputLabelProps={{
+                    shrink: true,
+                  }}
+                  onChange={releaseDateStartChangeHamdler}
+                ></TextField>
+              </FormControl>
+              <br />
+              <br />
+              <FormControl className="formControl">
+                <TextField
+                  id="Release Date End"
+                  type="date"
+                  label="Release Date End"
+                  variant="standard"
+                  InputLabelProps={{
+                    shrink: true,
+                  }}
+                  onChange={releaseDateEndChangeHamdler}
+                ></TextField>
+              </FormControl>
+              <br />
+              <br />
+              <div className="buttonDiv">
+                <Button
+                  type="submit"
+                  variant="contained"
+                  color="primary"
+                  onClick={applyButtonClickHandler}
+                >
+                  APPLY
+                </Button>
+              </div>
             </CardContent>
           </Card>
         </div>

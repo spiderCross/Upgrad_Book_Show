@@ -1,0 +1,42 @@
+.mainDiv {
+  display: flex;
+}
+
+.back {
+  margin: 8px 0px 0px 24px;
+}
+
+.moviePoster {
+  width: 20%;
+  margin-right: 10px;
+}
+
+.movieDetail {
+  width: 60%;
+}
+
+.movieExtraDeatils {
+  width: 20%;
+  margin-left: 10px;
+}
+
+starBalck {
+  color: black;
+}
+
+starYellow {
+  color: yellow;
+}
+
+.you-tube-player {
+  width: 640px;
+  max-width: 100%;
+  margin-top: 10px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  /* iframe {
+    height: 380px;
+    border-radius: 10px;
+  } */
+}

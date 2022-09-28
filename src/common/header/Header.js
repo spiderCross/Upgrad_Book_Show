@@ -13,46 +13,48 @@ import Modal from "react-modal";
 import "./Header.css";
 
 const Header = (props) => {
-  const [isLogin, setIsLogin] = React.useState(false);
+  //const [props.props.isLogin, props.setIsLogin] = React.useState(false);
   const [isModalOpen, setIsModalOpen] = React.useState(false);
 
   const loginButtonClickHandler = () => {
-    if (!isLogin) {
+    if (!props.isLogin) {
       setIsModalOpen(true);
     } else {
       userLogout();
-      setIsLogin(false);
+      props.setIsLogin(false);
     }
   };
-  const userLogout = async (userName, password) => {
+  const userLogout = async () => {
     let token = sessionStorage.getItem("access-token");
-    console.log(token);
-    const response = await fetch(`${props.baseUrl}auth/logout`, {
+    fetch(`${props.baseUrl}auth/logout`, {
       method: "POST",
       headers: {
         Accept: "*/*",
         authorization: `Bearer ${token}`,
       },
     });
-    console.log(response);
     sessionStorage.clear();
   };
 
   const handleClose = () => {
-    setIsLogin(true);
+    props.setIsLogin(true);
     setIsModalOpen(false);
   };
   const onBookShowButtonClicked = () => {
-    if (!isLogin) {
+    if (!props.isLogin) {
       setIsModalOpen(true);
+    } else {
+      let id = window.location.pathname.split("/")[2];
+      window.location.href = "/confirm/" + id;
     }
   };
   Modal.setAppElement("#root");
+
   return (
     <nav className="header">
       <div className="logo rotating"></div>
       <div>
-        {props.isReleased && (
+        {props.isShowBook && (
           <Button
             variant="contained"
             color="primary"
@@ -68,7 +70,7 @@ const Header = (props) => {
           color="default"
           onClick={loginButtonClickHandler}
         >
-          {!isLogin ? "Login" : "Logout"}
+          {!props.isLogin ? "Login" : "Logout"}
         </Button>
       </div>
       <Modal isOpen={isModalOpen}>
@@ -97,7 +99,7 @@ const ModalTabView = (Modalprops) => {
       case 1:
         return <RegisterForm baseUrl={Modalprops.baseUrl} />;
       default:
-        <p>Something Went Wrong</p>;
+        break;
     }
   };
 
